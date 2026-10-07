@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (large TLC Parquet files; not versioned) and outputs
+data/raw/
+outputs/
+
+# Spark
+spark-warehouse/
+metastore_db/
+derby.log
+*.crc
+
+# Testing
+.pytest_cache/
+.coverage
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
