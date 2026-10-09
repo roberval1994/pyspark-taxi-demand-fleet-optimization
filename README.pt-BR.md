@@ -28,6 +28,36 @@ Duas competências que raramente aparecem juntas, aplicadas a um problema realis
 A narrativa é **prever → decidir**: uma previsão só é útil se levar a uma decisão melhor.
 Isso espelha o trabalho real de logística (posicionamento de frota, alocação de recursos).
 
+## 💼 Contexto & impacto de negócio
+
+**Problema.** Um operador de táxi/mobilidade tem uma *frota limitada* e *demanda desigual*
+pela cidade. Colocar carros demais onde a demanda é baixa queima capacidade ociosa; de
+menos onde a demanda é alta faz perder corridas. A pergunta é operacional: **onde cada
+veículo deve estar?**
+
+**Quem se beneficia.** Operações (posicionamento de frota), times de receita (menos
+corridas perdidas) e motoristas (menos tempo ocioso).
+
+**Resultados medidos.** Sobre a demanda prevista, com uma frota de 40 veículos nas 50 zonas
+mais movimentadas, a **otimização exata cobriu ~69% da demanda vs. ~64% de uma regra gulosa
+proporcional** — um ganho de ~5 pontos de cobertura com a *mesma* frota, apenas decidindo a
+alocação de forma ótima.
+
+> 💡 *Enquadramento de negócio ilustrativo:* esses pontos extras de cobertura são corridas
+> que, de outro modo, seriam perdidas. Na escala de uma cidade e repetido a cada hora, a
+> alocação ótima se acumula em serviço e receita materialmente melhores com o **mesmo**
+> número de veículos.
+
+## 🧠 Decisões técnicas & trade-offs
+
+| Decisão | Por quê | Trade-off considerado |
+|---|---|---|
+| **PySpark** em vez de pandas | Milhões de corridas por mês, crescendo a cada mês adicionado; o mesmo código escala do laptop ao cluster | Spark exige JVM e tem custo de inicialização — só vale neste volume de dados |
+| **Parquet** como formato | Colunar + comprimido → lê só as colunas necessárias, muito mais rápido que CSV | Binário (não legível por humanos) — troca justa para análise |
+| **PLI exato (PuLP/CBC)** para alocação | Cobertura comprovadamente ótima; decisão auditável | Escala pior que heurísticas em instâncias enormes — comparado a um baseline guloso para provar que o ganho é real |
+| **Baseline guloso mantido ao lado** | Comparação honesta: mostra que o modelo exato realmente justifica sua complexidade | Código extra — mas é exatamente o que um tomador de decisão pede |
+| **Imports lazy do Spark** | O pacote importa e os testes de PO rodam mesmo sem o Spark instalado | Uma pequena indireção no código — vale pela testabilidade |
+
 ## 🗺️ Visão geral do pipeline
 
 ```

@@ -28,6 +28,35 @@ Two skills that rarely appear together, applied to one realistic problem:
 The narrative is **forecast → decide**: a prediction is only useful if it drives a better
 decision. This mirrors real logistics work (fleet positioning, resource allocation).
 
+## 💼 Business context & impact
+
+**Problem.** A ride-hailing / taxi operator has a *limited fleet* and *uneven demand*
+across a city. Put too many cars where demand is low and you burn idle capacity; too few
+where demand is high and you lose rides. The question is operational: **where should each
+vehicle be?**
+
+**Who benefits.** Operations (fleet positioning), revenue teams (fewer lost rides), and
+drivers (less idle time).
+
+**Measured results.** On the forecasted demand, with a fleet of 40 vehicles over the 50
+busiest zones, the **exact optimization covered ~69% of demand vs. ~64% for a proportional
+greedy rule** — a ~5-point gain in coverage from the same fleet, purely by deciding
+allocation optimally.
+
+> 💡 *Illustrative business framing:* those extra coverage points are rides that would
+> otherwise be lost. At city scale and repeated every hour, optimal allocation compounds
+> into materially better service and revenue from the **same** number of vehicles.
+
+## 🧠 Technical decisions & trade-offs
+
+| Decision | Why | Trade-off considered |
+|---|---|---|
+| **PySpark** instead of pandas | Millions of trips per month, growing with every added month; the same code scales from laptop to cluster | Spark needs a JVM and has startup overhead — only worth it at this data volume |
+| **Parquet** as the data format | Columnar + compressed → reads only the needed columns, far faster than CSV | Binary (not human-readable) — a fair trade for analytics |
+| **Exact ILP (PuLP/CBC)** for allocation | Provably optimal coverage; auditable decision | Scales worse than heuristics on huge instances — benchmarked against a greedy baseline to prove the gain is real |
+| **Greedy baseline kept alongside** | Honest comparison: shows the exact model actually earns its complexity | Extra code — but it is exactly what a decision-maker asks for |
+| **Lazy Spark imports** | The package imports and the OR tests run even without Spark installed | A little indirection in the code — worth it for testability |
+
 ## 🗺️ Pipeline overview
 
 ```
